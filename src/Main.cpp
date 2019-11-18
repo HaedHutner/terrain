@@ -1,109 +1,122 @@
 #include <iostream>
 
-#include <glad/glad.h>
-#include <glfw/glfw3.h>
-#include <glm/glm.hpp>
-#include <FastNoise/FastNoise.h>
-#include <stb/stb_image.h>
+#include <HeightMapGenerator.h>
 
-const GLfloat SQUARE_VERTICES[] = {
-    -0.5f, -0.5f, 0.0f,
-    +0.5f, -0.5f, 0.0f,
-    +0.5f, +0.5f, 0.0f,
-    -0.5f, +0.5f, 0.0f
-};
+// #include <glad/glad.h>
+// #include <glfw/glfw3.h>
+// #include <glm/glm.hpp>
+// #include <FastNoise/FastNoise.h>
+// #include <stb/stb_image.h>
 
-const GLuint SQUARE_INDICES[] = {
-    0, 1, 2, 
-    0, 3, 2
-};
+// const GLfloat SQUARE_VERTICES[] = {
+//     -0.5f, -0.5f, 0.0f,
+//     +0.5f, -0.5f, 0.0f,
+//     +0.5f, +0.5f, 0.0f,
+//     -0.5f, +0.5f, 0.0f
+// };
+
+// const GLuint SQUARE_INDICES[] = {
+//     0, 1, 2, 
+//     0, 3, 2
+// };
 
 int main()
 {
-    GLFWwindow *window;
+    HeightMapGenerator generator = HeightMapGenerator();
+    FloatMatrix result = generator.generateHeightMap({0, 0}, {16, 16}, {0.0f, 10.0f});
 
-    // GLFW Error callback
-    glfwSetErrorCallback([](int error, const char *desc) { fputs(desc, stderr); });
-
-    if (!glfwInit())
-    {
-        exit(EXIT_FAILURE);
+    for (int x = 0; x < 16; x++) {
+        for (int y = 0; y < 16; y++) {
+            std::cout << result(x, y) << " ";
+        }
+        std::cout << std::endl;
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+    return 0;
+    // GLFWwindow *window;
 
-    window = glfwCreateWindow(600, 600, "placeholder", nullptr, nullptr);
+    // // GLFW Error callback
+    // glfwSetErrorCallback([](int error, const char *desc) { fputs(desc, stderr); });
 
-    if (!window)
-    {
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
+    // if (!glfwInit())
+    // {
+    //     exit(EXIT_FAILURE);
+    // }
 
-    glfwMakeContextCurrent(window);
+    // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    // glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
-    // Window resize callback
-    glfwSetWindowSizeCallback(window, [](GLFWwindow *window, int width, int height){
-        glViewport(0, 0, width, height);
-    });
+    // window = glfwCreateWindow(600, 600, "Terrain", nullptr, nullptr);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize OpenGL context" << std::endl;
-        return -1;
-    }
+    // if (!window)
+    // {
+    //     glfwTerminate();
+    //     exit(EXIT_FAILURE);
+    // }
 
-    printf("OpenGL %d.%d\n", GLVersion.major, GLVersion.minor);
+    // glfwMakeContextCurrent(window);
 
-    GLuint vao, vbo, ebo;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    // // Window resize callback
+    // glfwSetWindowSizeCallback(window, [](GLFWwindow *window, int width, int height){
+    //     glViewport(0, 0, width, height);
+    // });
 
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(SQUARE_VERTICES), SQUARE_VERTICES, GL_STATIC_DRAW);
+    // if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    // {
+    //     std::cout << "Failed to initialize OpenGL context" << std::endl;
+    //     return -1;
+    // }
 
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(SQUARE_INDICES), SQUARE_INDICES, GL_STATIC_DRAW);
+    // printf("OpenGL %d.%d\n", GLVersion.major, GLVersion.minor);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // GLuint vao, vbo, ebo;
+    // glGenVertexArrays(1, &vao);
+    // glBindVertexArray(vao);
 
-    glBindVertexArray(0);
+    // glGenBuffers(1, &vbo);
+    // glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(SQUARE_VERTICES), SQUARE_VERTICES, GL_STATIC_DRAW);
 
-    glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1.0);
+    // glGenBuffers(1, &ebo);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(SQUARE_INDICES), SQUARE_INDICES, GL_STATIC_DRAW);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    while (!glfwWindowShouldClose(window))
-    {
+    // glBindVertexArray(0);
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1.0);
 
-        glEnableVertexAttribArray(0);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    // while (!glfwWindowShouldClose(window))
+    // {
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
+    //     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glDrawElements(GL_TRIANGLES, sizeof(SQUARE_INDICES), GL_UNSIGNED_INT, NULL);
+    //     glEnableVertexAttribArray(0);
 
-        glDisableVertexAttribArray(0);
+    //     glBindVertexArray(vao);
+    //     glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    //     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
+    //     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
 
-    glfwDestroyWindow(window);
+    //     glDrawElements(GL_TRIANGLES, sizeof(SQUARE_INDICES), GL_UNSIGNED_INT, NULL);
 
-    glfwTerminate();
+    //     glDisableVertexAttribArray(0);
 
-    exit(EXIT_SUCCESS);
+    //     glfwSwapBuffers(window);
+    //     glfwPollEvents();
+    // }
+
+    // glfwDestroyWindow(window);
+
+    // glfwTerminate();
+
+    // exit(EXIT_SUCCESS);
 }

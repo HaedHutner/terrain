@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(placeholder)
+project(terrain)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -12,9 +12,15 @@ add_subdirectory("external/glad")
 add_subdirectory("external/glfw")
 add_subdirectory("external/glm")
 
+file(GLOB_RECURSE HEADERS ./include/*.h)
+file(GLOB_RECURSE SOURCES ./src/*.cpp)
+
 add_executable(
     ${PROJECT_NAME}
-    src/Main.cpp
+    ${HEADERS}
+    ${SOURCES}
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC glad glfw glm fastnoise stb)
+target_include_directories(${PROJECT_NAME} PUBLIC ./include)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC glad glm glfw fastnoise stb)
