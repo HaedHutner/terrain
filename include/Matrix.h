@@ -6,13 +6,7 @@ namespace tools {
 
 	template <typename T>
 	Matrix<T> create_matrix(int width, int height, T initialValue) {
-		std::vector<std::vector<T>> matrix(width);
-		
-		for (int i = 0; i < height; i++) {
-			matrix[i].resize(initialValue);
-		}
-
-		return matrix;
+		return std::vector<std::vector<T>>(width, std::vector<T>(height, initialValue));
 	}
 }
 
