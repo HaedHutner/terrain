@@ -1,10 +1,10 @@
-#include <FloatMatrix.h>
+#include <Matrix.h>
 
 class TerrainChunk {
 
 private:
 
-    FloatMatrix heightMap;
+    tools::Matrix<float> heightMap;
 
 public:
 

@@ -6,12 +6,12 @@ HeightMapGenerator::HeightMapGenerator(const FastNoise::NoiseType &noiseType, co
     fastNoise->SetNoiseType(noiseType);
 }
 
-FloatMatrix HeightMapGenerator::generateHeightMap(const glm::ivec2 &startingPosition, const glm::ivec2 &sizeLimits, const glm::fvec2 &heightLimits) {
-    FloatMatrix heightMap = FloatMatrix(sizeLimits.x, sizeLimits.y, heightLimits.x);
+tools::Matrix<float> HeightMapGenerator::generateHeightMap(const glm::ivec2 &startingPosition, const glm::ivec2 &sizeLimits, const float &startingHeight, const float &heightModifier) {
+	tools::Matrix<float> heightMap = tools::create_matrix(sizeLimits.x, sizeLimits.y, startingHeight);
 
     for (int x = 0; x < sizeLimits.x; x++) {
         for (int y = 0; y < sizeLimits.y; y++) {
-            heightMap.set(x, y, heightLimits.x + ( fastNoise->GetNoise(startingPosition.x + x, startingPosition.y + y) * heightLimits.y ) );
+            heightMap[x][y] = startingHeight + ( fastNoise->GetNoise(startingPosition.x + x, startingPosition.y + y) * heightModifier );
         }
     }
 

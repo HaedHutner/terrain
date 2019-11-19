@@ -1,4 +1,6 @@
 #include <iostream>
+#include <vector>
+#include <thread>
 
 #include <HeightMapGenerator.h>
 
@@ -22,12 +24,14 @@
 
 int main()
 {
+	std::thread t([]() {});
+
     HeightMapGenerator generator = HeightMapGenerator();
-    FloatMatrix result = generator.generateHeightMap({0, 0}, {16, 16}, {0.0f, 10.0f});
+    tools::Matrix<float> result = generator.generateHeightMap({0, 0}, {16, 16});
 
     for (int x = 0; x < 16; x++) {
         for (int y = 0; y < 16; y++) {
-            std::cout << result(x, y) << " ";
+            std::cout << result[x][y] << " ";
         }
         std::cout << std::endl;
     }
