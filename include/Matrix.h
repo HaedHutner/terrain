@@ -1,3 +1,7 @@
+#ifndef _MATRIX_H
+#define _MATRIX_H
+
+#include <memory>
 #include <vector>
 
 namespace tools {
@@ -5,8 +9,9 @@ namespace tools {
 	using Matrix = std::vector<std::vector<T>>;
 
 	template <typename T>
-	Matrix<T> create_matrix(int width, int height, T initialValue) {
+	Matrix<T> CreateMatrix(int width, int height, T initialValue) {
 		return std::vector<std::vector<T>>(width, std::vector<T>(height, initialValue));
 	}
 }
 
+#endif

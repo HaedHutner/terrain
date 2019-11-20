@@ -1,8 +1,11 @@
 #include <iostream>
 #include <vector>
 #include <thread>
+#include <memory>
 
+#include <TerrainChunk.h>
 #include <HeightMapGenerator.h>
+#include <MaterialsGenerator.h>
 
 // #include <glad/glad.h>
 // #include <glfw/glfw3.h>
@@ -27,11 +30,14 @@ int main()
 	std::thread t([]() {});
 
     HeightMapGenerator generator = HeightMapGenerator();
-    tools::Matrix<float> result = generator.generateHeightMap({0, 0}, {16, 16});
+
+	tools::Matrix<float> heightMap = generator.GenerateHeightMap({ 0, 0 }, { 16, 16 });
+
+	TerrainChunk chunk({ 0, 0 }, { 16, 16 }, heightMap);
 
     for (int x = 0; x < 16; x++) {
         for (int y = 0; y < 16; y++) {
-            std::cout << result[x][y] << " ";
+			printf("%6.3f ", chunk.GetHeightMap()[x][y]);
         }
         std::cout << std::endl;
     }
