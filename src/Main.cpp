@@ -2,131 +2,43 @@
 #include <vector>
 #include <thread>
 #include <memory>
+#include <ctime>
+#include <atomic>
+#include <mutex>
 
-#include <TerrainChunk.h>
-#include <HeightMapGenerator.h>
-#include <MaterialsGenerator.h>
+#include <TerrainWorld.h>
 
-// #include <glad/glad.h>
-// #include <glfw/glfw3.h>
-// #include <glm/glm.hpp>
-// #include <FastNoise/FastNoise.h>
-// #include <stb/stb_image.h>
-
-// const GLfloat SQUARE_VERTICES[] = {
-//     -0.5f, -0.5f, 0.0f,
-//     +0.5f, -0.5f, 0.0f,
-//     +0.5f, +0.5f, 0.0f,
-//     -0.5f, +0.5f, 0.0f
-// };
-
-// const GLuint SQUARE_INDICES[] = {
-//     0, 1, 2, 
-//     0, 3, 2
-// };
+#include <renderer/Camera.h>
+#include <renderer/TerrainRenderer.h>
 
 int main()
 {
-	std::thread t([]() {});
+	int screenX = 800, screenY = 600;
 
-    HeightMapGenerator generator = HeightMapGenerator();
+	std::atomic<bool> isWorking{ true };
+	std::atomic<Camera> camera{ Camera(90.0, 3.0, 1.0, screenX, screenY) };
+	std::atomic<TerrainWorld> world{ TerrainWorld("Test", HeightMapGenerator()) };
 
-	tools::Matrix<float> heightMap = generator.GenerateHeightMap({ 0, 0 }, { 16, 16 });
+	auto gameplayThread = std::thread([&]() {
+		while (isWorking) {
 
-	TerrainChunk chunk({ 0, 0 }, { 16, 16 }, heightMap);
+			TerrainWorld worldCopy = world.load();
+			Camera cameraCopy = camera.load();
+			worldCopy.GenerateChunksAt({ cameraCopy.GetPosition().x, cameraCopy.GetPosition().y }, 3);
+			world.store(worldCopy);
 
-    for (int x = 0; x < 16; x++) {
-        for (int y = 0; y < 16; y++) {
-			printf("%6.3f ", chunk.GetHeightMap()[x][y]);
-        }
-        std::cout << std::endl;
-    }
+			printf("Generated chunks...\n");
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		}
+	});
 
-    return EXIT_SUCCESS;
-    // GLFWwindow *window;
+	auto renderThread = std::thread([&]() {
+		TerrainRenderer renderer = TerrainRenderer(world, camera, isWorking);
+		renderer.StartRenderer(); // *isWorking = false somewhere in here
+	});
 
-    // // GLFW Error callback
-    // glfwSetErrorCallback([](int error, const char *desc) { fputs(desc, stderr); });
+	renderThread.join();
+	gameplayThread.join();
 
-    // if (!glfwInit())
-    // {
-    //     exit(EXIT_FAILURE);
-    // }
-
-    // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    // glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-
-    // window = glfwCreateWindow(600, 600, "Terrain", nullptr, nullptr);
-
-    // if (!window)
-    // {
-    //     glfwTerminate();
-    //     exit(EXIT_FAILURE);
-    // }
-
-    // glfwMakeContextCurrent(window);
-
-    // // Window resize callback
-    // glfwSetWindowSizeCallback(window, [](GLFWwindow *window, int width, int height){
-    //     glViewport(0, 0, width, height);
-    // });
-
-    // if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    // {
-    //     std::cout << "Failed to initialize OpenGL context" << std::endl;
-    //     return -1;
-    // }
-
-    // printf("OpenGL %d.%d\n", GLVersion.major, GLVersion.minor);
-
-    // GLuint vao, vbo, ebo;
-    // glGenVertexArrays(1, &vao);
-    // glBindVertexArray(vao);
-
-    // glGenBuffers(1, &vbo);
-    // glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(SQUARE_VERTICES), SQUARE_VERTICES, GL_STATIC_DRAW);
-
-    // glGenBuffers(1, &ebo);
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(SQUARE_INDICES), SQUARE_INDICES, GL_STATIC_DRAW);
-
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // glBindVertexArray(0);
-
-    // glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1.0);
-
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    // while (!glfwWindowShouldClose(window))
-    // {
-
-    //     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    //     glEnableVertexAttribArray(0);
-
-    //     glBindVertexArray(vao);
-    //     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    //     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-
-    //     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
-
-    //     glDrawElements(GL_TRIANGLES, sizeof(SQUARE_INDICES), GL_UNSIGNED_INT, NULL);
-
-    //     glDisableVertexAttribArray(0);
-
-    //     glfwSwapBuffers(window);
-    //     glfwPollEvents();
-    // }
-
-    // glfwDestroyWindow(window);
-
-    // glfwTerminate();
-
-    // exit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }

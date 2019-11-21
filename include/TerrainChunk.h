@@ -15,13 +15,19 @@ private:
 
 	glm::ivec2 position;
 
+	glm::vec2 middlePoint;
+
 	glm::ivec2 size;
 
 public:
 
+	TerrainChunk();
+
 	TerrainChunk(glm::ivec2 position, glm::ivec2 size, tools::Matrix<float> heightMap);
 
 	const tools::Matrix<float> &GetHeightMap() const;
+
+	const glm::vec2 &GetMiddlePoint() const;
 
 	const glm::ivec2 &GetPosition() const;
 

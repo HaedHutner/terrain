@@ -7,13 +7,11 @@ class MatrixGenerator {
 
 protected:
 
-	FastNoise* fastNoise;
+	FastNoise fastNoise;
 
 public:
 
 	MatrixGenerator(const FastNoise::NoiseType &noiseType = FastNoise::NoiseType::PerlinFractal, const int &seed = 1337);
-
-	~MatrixGenerator();
 
 };
 

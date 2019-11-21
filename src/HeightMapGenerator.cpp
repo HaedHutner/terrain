@@ -10,7 +10,7 @@ tools::Matrix<float> HeightMapGenerator::GenerateHeightMap(const glm::ivec2 &sta
 
     for (int x = 0; x < sizeLimits.x; x++) {
         for (int y = 0; y < sizeLimits.y; y++) {
-            heightMap[x][y] = startingHeight + ( fastNoise->GetNoise(startingPosition.x + x, startingPosition.y + y) * heightModifier );
+            heightMap[x][y] = startingHeight + ( fastNoise.GetNoise(startingPosition.x + x, startingPosition.y + y) * heightModifier );
         }
     }
 
