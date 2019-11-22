@@ -11,7 +11,7 @@ class TerrainChunk {
 
 private:
 
-    tools::Matrix<float> heightMap;
+    std::vector<float> heights;
 
 	glm::ivec2 position;
 
@@ -25,7 +25,9 @@ public:
 
 	TerrainChunk(glm::ivec2 position, glm::ivec2 size, tools::Matrix<float> heightMap);
 
-	const tools::Matrix<float> &GetHeightMap() const;
+	const float GetHeightAt(int x, int y) const;
+
+	const std::vector<float> &GetHeights() const;
 
 	const glm::vec2 &GetMiddlePoint() const;
 

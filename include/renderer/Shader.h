@@ -37,6 +37,8 @@ public:
 
 	void SetUniformFloat(const std::string& name, float value) const;
 
+	void SetUniformFloatArray(const std::string &name, const int size, const float *value) const;
+
 	void SetUniformDouble(const std::string& name, double value) const;
 
 	void SetUniformMat4(const std::string& name, const glm::mat4& matrix) const;

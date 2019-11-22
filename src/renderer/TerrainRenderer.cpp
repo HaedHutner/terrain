@@ -1,47 +1,12 @@
 ﻿#include <renderer/TerrainRenderer.h>
 
-TerrainRenderer::TerrainRenderer(std::atomic<TerrainWorld> &world, std::atomic<Camera> &camera, std::atomic<bool> &isWorking)
-	: world(world), camera(camera), isWorking(isWorking)
+TerrainRenderer::TerrainRenderer(std::mutex &m, TerrainWorld &world, Camera &camera, std::atomic<bool> &isWorking)
+	: m(m), world(world), camera(camera), isWorking(isWorking)
 {
 }
 
 void TerrainRenderer::StartRenderer()
 {
-	//for (int x = -9; x < 10; x++) {
-	//	for (int y = -9; y < 10; y++) {
-
-	//		std::vector<TerrainChunk> chunks = world->FetchCachedChunksAt({ CHUNK_WIDTH * x, CHUNK_WIDTH * y }, 3);
-
-	//		int howManyChunks = 0;
-
-	//		for (auto& chunk : chunks) {
-	//			howManyChunks++;
-	//		}
-
-	//		printf("{%3d, %3d} %2d|", x * CHUNK_WIDTH, y * CHUNK_WIDTH, howManyChunks);
-	//	}
-	//	std::cout << std::endl;
-	//}
-	const GLfloat SQUARE_VERTICES[] = {
-		-1.0f, -1.0f,  -1.0f, // 0
-		1.0f, -1.0f,  -1.0f,  // 1
-		1.0f,  1.0f,  -1.0f, // 2
-		-1.0f,  1.0f,  -1.0f,  // 3
-		-1.0f, -1.0f, 1.0f, // 4
-		1.0f, -1.0f, 1.0f,  // 5
-		1.0f,  1.0f, 1.0f, // 6
-		-1.0f,  1.0f, 1.0f   // 7
-	};
-
-	const GLuint SQUARE_INDICES[] = {
-		0, 1, 3, 3, 1, 2,
-		1, 5, 2, 2, 5, 6,
-		5, 4, 6, 6, 4, 7,
-		4, 0, 7, 7, 0, 3,
-		3, 2, 7, 7, 2, 6,
-		4, 5, 0, 0, 5, 1
-	};
-
 	GLFWwindow *window;
 
 	// GLFW Error callback
@@ -58,7 +23,7 @@ void TerrainRenderer::StartRenderer()
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
-	window = glfwCreateWindow(camera.load().GetScreenX(), camera.load().GetScreenY(), "Terrain", nullptr, nullptr);
+	window = glfwCreateWindow(camera.GetScreenX(), camera.GetScreenY(), "Terrain", nullptr, nullptr);
 
 	if (!window)
 	{
@@ -90,26 +55,6 @@ void TerrainRenderer::StartRenderer()
 
 	shader.Link();
 
-	GLuint vao, vbo, ebo;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(SQUARE_VERTICES), SQUARE_VERTICES, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, 0);
-
-	glGenBuffers(1, &ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(SQUARE_INDICES), SQUARE_INDICES, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glBindVertexArray(0);
-
 	glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1.0);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -118,31 +63,24 @@ void TerrainRenderer::StartRenderer()
 
 	while (!glfwWindowShouldClose(window))
 	{
-		Camera cameraCopy = camera.load();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		m.lock();
+		camera.ProcessKeyInput(window);
+		std::vector<TerrainChunk> chunks = world.FetchCachedChunksAt({ (int) camera.GetPosition().x, (int) camera.GetPosition().z }, 3);
+
+		for (auto& chunk : chunks) {
+			int resolution = 1;
+			DrawSingleTerrainChunk(chunk, resolution);
+		}
+
+		printf("Rendered %d cached chunks\n", chunks.size());
+		m.unlock();
 
 		double cursorX, cursorY;
 		glfwGetCursorPos(window, &cursorX, &cursorY);
-		cameraCopy.ProcessMouseInput(window, cursorX, cursorY);
 
-		cameraCopy.ProcessKeyInput(window);
-
-	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	    glEnableVertexAttribArray(0);
-
-	    glBindVertexArray(vao);
-	    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-
-	    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
-
-		shader.SetUniformMat4("projection", cameraCopy.GetProjection());
-		shader.SetUniformMat4("view", cameraCopy.GetView());
-		shader.SetUniformMat4("model", glm::mat4(1.0f));
-
-	    glDrawElements(GL_TRIANGLES, sizeof(SQUARE_INDICES), GL_UNSIGNED_INT, NULL);
-
-	    glDisableVertexAttribArray(0);
+		camera.ProcessMouseInput(window, cursorX, cursorY);
 
 	    glfwSwapBuffers(window);
 	    glfwPollEvents();
@@ -155,7 +93,78 @@ void TerrainRenderer::StartRenderer()
 	isWorking = false;
 }
 
-void TerrainRenderer::DrawSingleTerrainChunk(TerrainChunk chunk)
+void TerrainRenderer::DrawSingleTerrainChunk(TerrainChunk &chunk, int &resolution)
 {
-	
+	GenerateChunkMesh(chunk, resolution);
+	BindChunkMesh(chunk, resolution);
+	DrawChunkMesh(chunk, resolution);
 }
+
+void TerrainRenderer::GenerateChunkMesh(TerrainChunk& chunk, int& resolution)
+{
+	if (cachedMeshes.find(resolution) != cachedMeshes.end()) {
+		return;
+	}
+
+	int sideSize = (chunk.GetSize().x / resolution);
+	int verticesSize = (chunk.GetHeights().size() / resolution);
+
+	std::vector<GLuint> elements = std::vector<GLuint>(verticesSize * 6);
+	std::vector<glm::ivec2> vertices = std::vector<glm::ivec2>(verticesSize);
+
+	//			  i +---+ i + 1
+	//				|\  |
+	//				| \ |
+	//				|  \|
+	// i + sideSize +---+ i + sizeSize + 1
+	//
+	// 
+
+	int j = 0;
+	for (int i = 0; i < verticesSize; i++) {
+		int x = i % sideSize;
+		int y = i / sideSize;
+
+		vertices[i] = glm::ivec2(x, y);
+
+		if (x % 63 == 0 || y % 63 == 0) continue;
+
+		elements[j	  ] = i;
+		elements[j + 1] = i + sideSize;
+		elements[j + 2] = i + sideSize + 1;
+		elements[j + 3] = i + sideSize + 1;
+		elements[j + 4] = i + 1;
+		elements[j + 5] = i;
+
+		j += 6;	
+	}
+
+	Mesh mesh = Mesh(elements, vertices);
+	cachedMeshes[resolution] = mesh;
+}
+
+void TerrainRenderer::BindChunkMesh(TerrainChunk& chunk, int &resolution)
+{
+	cachedMeshes[resolution].Bind();
+
+	glBufferData(GL_UNIFORM_BUFFER, chunk.GetHeights().size() * sizeof(float), &chunk.GetHeights()[0], GL_DYNAMIC_DRAW);
+	glUniformBlockBinding(shader.Id(), glGetUniformBlockIndex(shader.Id(), "HeightsBlock"), 0);
+
+	shader.SetUniformMat4("projection", camera.GetProjection());
+	shader.SetUniformMat4("view", camera.GetView());
+	shader.SetUniformMat4("model", glm::translate(
+			glm::mat4(1.0), 
+			glm::vec3(
+				1.0f * (chunk.GetPosition().x * ( CHUNK_WIDTH )), 
+				0.0f,
+				1.0f * (chunk.GetPosition().y * ( CHUNK_WIDTH )) 
+			)
+		)
+	);
+}
+
+void TerrainRenderer::DrawChunkMesh(TerrainChunk& chunk, int &resolution)
+{
+	cachedMeshes[resolution].Draw();
+}
+

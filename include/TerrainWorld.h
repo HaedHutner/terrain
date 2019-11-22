@@ -57,17 +57,17 @@ public:
 
 	TerrainWorld(std::string name, HeightMapGenerator heightMapGenerator);
 
-	const TerrainChunk FetchChunkAt(glm::vec2 absoluteCoordinates);
+	const TerrainChunk FetchChunkAt(glm::ivec2 absoluteCoordinates);
 
-	const std::vector<TerrainChunk> FetchChunksAt(glm::vec2 absoluteCoordinates, int radius = 1);
+	const std::vector<TerrainChunk> FetchChunksAt(glm::ivec2 absoluteCoordinates, int radius = 1);
 
-	const void GenerateChunkAt(glm::vec2 absoluteCoordinates);
+	const void GenerateChunkAt(glm::ivec2 absoluteCoordinates);
 
-	const void GenerateChunksAt(glm::vec2 absoluteCoordinates, int radius = 1);
+	const void GenerateChunksAt(glm::ivec2 absoluteCoordinates, int radius = 1);
 
-	const std::optional<TerrainChunk> FetchCachedChunkAt(glm::vec2 absoluteCoordiantes) const;
+	const std::optional<TerrainChunk> FetchCachedChunkAt(glm::ivec2 absoluteCoordiantes) const;
 
-	const std::vector<TerrainChunk> FetchCachedChunksAt(glm::vec2 absoluteCoordinates, int radius = 1) const;
+	const std::vector<TerrainChunk> FetchCachedChunksAt(glm::ivec2 absoluteCoordinates, int radius = 1) const;
 
 };
 

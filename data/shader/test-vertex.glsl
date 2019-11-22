@@ -1,15 +1,25 @@
-#version 410
+#version 420
 
-const uint chunkSize = 64;
+const int chunkSize = 64;
 
-layout( location = 0 ) in vec3 position;
+layout( location = 0 ) in ivec2 position;
 
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 
-uniform float heights[chunkSize * chunkSize];
+layout ( std140, binding = 0 ) uniform HeightsBlock 
+{
+	float values[chunkSize * chunkSize];
+};
 
 void main () {
-	gl_Position = projection * view * model * vec4(position, 1.0);
+	vec4 truePosition = vec4(
+		position.x,
+		10.0 * values[position.y + chunkSize * position.x], 
+		position.y,
+		1.0
+	);
+
+	gl_Position = projection * view * model * truePosition;
 }

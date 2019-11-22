@@ -2,12 +2,15 @@
 #define _TERRAIN_RENDERER_H
 
 #include <atomic>
+#include <mutex>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <renderer/Camera.h>
 #include <renderer/Shader.h>
+#include <renderer/Mesh.h>
 #include <TerrainWorld.h>
 
 const std::vector<GLuint> MESH_INDICES;
@@ -18,17 +21,27 @@ class TerrainRenderer {
 
 	std::atomic<bool> &isWorking;
 
-	std::atomic<Camera> &camera;
+	Camera &camera;
 
-	std::atomic<TerrainWorld> &world;
+	TerrainWorld &world;
+
+	std::mutex &m;
+
+	std::unordered_map<int, Mesh> cachedMeshes;
 
 	Shader shader;
 
-	void DrawSingleTerrainChunk(TerrainChunk chunk);
+	void DrawSingleTerrainChunk(TerrainChunk &chunk, int &resolution);
+
+	void GenerateChunkMesh(TerrainChunk &chunk, int& resolution);
+
+	void BindChunkMesh(TerrainChunk &chunk, int &resolution);
+
+	void DrawChunkMesh(TerrainChunk &chunk, int &resolution);
 
 public:
 
-	TerrainRenderer(std::atomic<TerrainWorld> &world, std::atomic<Camera> &camera, std::atomic<bool> &isWorking);
+	TerrainRenderer(std::mutex &m, TerrainWorld& world, Camera& camera, std::atomic<bool>& isWorking);
 
 	void StartRenderer();
 

@@ -9,7 +9,7 @@ TerrainWorld::TerrainWorld(std::string name, HeightMapGenerator heightMapGenerat
 {
 }
 
-const TerrainChunk TerrainWorld::FetchChunkAt(glm::vec2 absoluteCoordinates)
+const TerrainChunk TerrainWorld::FetchChunkAt(glm::ivec2 absoluteCoordinates)
 {
 	glm::ivec2 chunkCoordinates = { absoluteCoordinates.x / CHUNK_WIDTH, absoluteCoordinates.y / CHUNK_WIDTH };
 
@@ -34,7 +34,7 @@ const TerrainChunk TerrainWorld::FetchChunkAt(glm::vec2 absoluteCoordinates)
 	}
 }
 
-const std::vector<TerrainChunk> TerrainWorld::FetchChunksAt(glm::vec2 absoluteCoordinates, int radius)
+const std::vector<TerrainChunk> TerrainWorld::FetchChunksAt(glm::ivec2 absoluteCoordinates, int radius)
 {
 	if (radius == 0) {
 		return std::vector<TerrainChunk>{ FetchChunkAt(absoluteCoordinates) };
@@ -72,7 +72,7 @@ const std::vector<TerrainChunk> TerrainWorld::FetchChunksAt(glm::vec2 absoluteCo
 	}
 }
 
-const void TerrainWorld::GenerateChunkAt(glm::vec2 absoluteCoordinates)
+const void TerrainWorld::GenerateChunkAt(glm::ivec2 absoluteCoordinates)
 {
 	glm::ivec2 chunkCoordinates = { absoluteCoordinates.x / CHUNK_WIDTH, absoluteCoordinates.y / CHUNK_WIDTH };
 
@@ -95,7 +95,7 @@ const void TerrainWorld::GenerateChunkAt(glm::vec2 absoluteCoordinates)
 	}
 }
 
-const void TerrainWorld::GenerateChunksAt(glm::vec2 absoluteCoordinates, int radius)
+const void TerrainWorld::GenerateChunksAt(glm::ivec2 absoluteCoordinates, int radius)
 {
 	if (radius == 0) {
 		GenerateChunkAt(absoluteCoordinates);
@@ -127,12 +127,12 @@ const void TerrainWorld::GenerateChunksAt(glm::vec2 absoluteCoordinates, int rad
 	}
 }
 
-const std::optional<TerrainChunk> TerrainWorld::FetchCachedChunkAt(glm::vec2 absoluteCoordinates) const
+const std::optional<TerrainChunk> TerrainWorld::FetchCachedChunkAt(glm::ivec2 absoluteCoordinates) const
 {
 	return grid.FetchOne({ absoluteCoordinates.x / CHUNK_WIDTH, absoluteCoordinates.y / CHUNK_WIDTH });
 }
 
-const std::vector<TerrainChunk> TerrainWorld::FetchCachedChunksAt(glm::vec2 absoluteCoordinates, int radius) const
+const std::vector<TerrainChunk> TerrainWorld::FetchCachedChunksAt(glm::ivec2 absoluteCoordinates, int radius) const
 {
 	return grid.Fetch({ absoluteCoordinates.x / CHUNK_WIDTH, absoluteCoordinates.y / CHUNK_WIDTH }, radius);
 }
