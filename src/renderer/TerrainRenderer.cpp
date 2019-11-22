@@ -67,14 +67,14 @@ void TerrainRenderer::StartRenderer()
 
 		m.lock();
 		camera.ProcessKeyInput(window);
-		std::vector<TerrainChunk> chunks = world.FetchCachedChunksAt({ (int) camera.GetPosition().x, (int) camera.GetPosition().z }, 3);
+		std::vector<TerrainChunk> chunks = world.FetchCachedChunksAt({ (int) camera.GetPosition().x, (int) camera.GetPosition().z }, 4);
 
 		for (auto& chunk : chunks) {
 			int resolution = 1;
 			DrawSingleTerrainChunk(chunk, resolution);
 		}
 
-		printf("Rendered %d cached chunks\n", chunks.size());
+		// printf("Rendered %d cached chunks\n", chunks.size());
 		m.unlock();
 
 		double cursorX, cursorY;
@@ -106,7 +106,7 @@ void TerrainRenderer::GenerateChunkMesh(TerrainChunk& chunk, int& resolution)
 		return;
 	}
 
-	int sideSize = (chunk.GetSize().x / resolution);
+	int sideSize = (chunk.GetSize().x / resolution) ;
 	int verticesSize = (chunk.GetHeights().size() / resolution);
 
 	std::vector<GLuint> elements = std::vector<GLuint>(verticesSize * 6);
@@ -120,21 +120,21 @@ void TerrainRenderer::GenerateChunkMesh(TerrainChunk& chunk, int& resolution)
 	//
 	// 
 
-	int j = 0;
+	int j = 5;
 	for (int i = 0; i < verticesSize; i++) {
 		int x = i % sideSize;
 		int y = i / sideSize;
 
 		vertices[i] = glm::ivec2(x, y);
 
-		if (x % 63 == 0 || y % 63 == 0) continue;
+		if ((x % 63 == 0) || (y % 63 == 0)) continue;
 
-		elements[j	  ] = i;
-		elements[j + 1] = i + sideSize;
-		elements[j + 2] = i + sideSize + 1;
-		elements[j + 3] = i + sideSize + 1;
-		elements[j + 4] = i + 1;
-		elements[j + 5] = i;
+		elements[j - 5] = i;
+		elements[j - 4] = i + sideSize;
+		elements[j - 3] = i + sideSize + 1;
+		elements[j - 2] = i + sideSize + 1;
+		elements[j - 1] = i + 1;
+		elements[j    ] = i;
 
 		j += 6;	
 	}
@@ -155,9 +155,9 @@ void TerrainRenderer::BindChunkMesh(TerrainChunk& chunk, int &resolution)
 	shader.SetUniformMat4("model", glm::translate(
 			glm::mat4(1.0), 
 			glm::vec3(
-				1.0f * (chunk.GetPosition().x * ( CHUNK_WIDTH )), 
+				1.0f * (chunk.GetPosition().x * ( CHUNK_WIDTH - 1)), 
 				0.0f,
-				1.0f * (chunk.GetPosition().y * ( CHUNK_WIDTH )) 
+				1.0f * (chunk.GetPosition().y * ( CHUNK_WIDTH - 1)) 
 			)
 		)
 	);

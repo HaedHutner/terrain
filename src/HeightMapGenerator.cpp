@@ -3,6 +3,8 @@
 HeightMapGenerator::HeightMapGenerator(const FastNoise::NoiseType &noiseType, const int &seed) 
 	: MatrixGenerator(noiseType, seed)
 {
+	fastNoise.SetNoiseType(FastNoise::NoiseType::PerlinFractal);
+	fastNoise.SetFractalOctaves(5);
 }
 
 tools::Matrix<float> HeightMapGenerator::GenerateHeightMap(const glm::ivec2 &startingPosition, const glm::ivec2 &sizeLimits, const float &startingHeight, const float &heightModifier) {
