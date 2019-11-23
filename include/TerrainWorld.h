@@ -13,6 +13,8 @@
 
 const int CHUNK_WIDTH = 64;
 
+const float HEIGHT_AMPLIFICATION = 100.0;
+
 //constexpr std::vector<int> FetchChunkVertexIndices() {
 //	std::vector<int> indices = std::vector<int>(CHUNK_WIDTH * CHUNK_WIDTH);
 //

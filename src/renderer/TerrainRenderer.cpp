@@ -49,7 +49,7 @@ void TerrainRenderer::StartRenderer()
 
 	printf("%s %s OpenGL %d.%d\n", vendor, renderer, GLVersion.major, GLVersion.minor);
 
-	shader = Shader::FromFiles("C:/Users/Miroslav.VSG/Workspace/terrain/data/shader/test-vertex.glsl", "C:/Users/Miroslav.VSG/Workspace/terrain/data/shader/test-fragment.glsl");
+	shader = Shader::FromFiles("./data/shader/test-vertex.glsl", "./data/shader/test-fragment.glsl");
 
 	glBindAttribLocation(shader.Id(), 0, "position");
 
@@ -63,8 +63,6 @@ void TerrainRenderer::StartRenderer()
 
 	while (!glfwWindowShouldClose(window))
 	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		m.lock();
 		camera.ProcessKeyInput(window);
 		std::vector<TerrainChunk> chunks = world.FetchCachedChunksAt({ (int) camera.GetPosition().x, (int) camera.GetPosition().z }, 4);
@@ -84,6 +82,8 @@ void TerrainRenderer::StartRenderer()
 
 	    glfwSwapBuffers(window);
 	    glfwPollEvents();
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	glfwDestroyWindow(window);
@@ -118,25 +118,24 @@ void TerrainRenderer::GenerateChunkMesh(TerrainChunk& chunk, int& resolution)
 	//				|  \|
 	// i + sideSize +---+ i + sizeSize + 1
 	//
-	// 
-
-	int j = 5;
+	//
+	int j = sideSize + 1;
 	for (int i = 0; i < verticesSize; i++) {
 		int x = i % sideSize;
 		int y = i / sideSize;
 
 		vertices[i] = glm::ivec2(x, y);
 
-		if ((x % 63 == 0) || (y % 63 == 0)) continue;
+		if ((x == 0 || y == 0)) continue;
 
-		elements[j - 5] = i;
-		elements[j - 4] = i + sideSize;
-		elements[j - 3] = i + sideSize + 1;
-		elements[j - 2] = i + sideSize + 1;
-		elements[j - 1] = i + 1;
 		elements[j    ] = i;
+		elements[j - 1] = i - sideSize;
+		elements[j - 2] = i - sideSize - 1;
+		elements[j - 3] = i - sideSize - 1;
+		elements[j - 4] = i - 1;
+		elements[j - 5] = i;
 
-		j += 6;	
+		j += 6;
 	}
 
 	Mesh mesh = Mesh(elements, vertices);
@@ -147,17 +146,18 @@ void TerrainRenderer::BindChunkMesh(TerrainChunk& chunk, int &resolution)
 {
 	cachedMeshes[resolution].Bind();
 
-	glBufferData(GL_UNIFORM_BUFFER, chunk.GetHeights().size() * sizeof(float), &chunk.GetHeights()[0], GL_DYNAMIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, chunk.GetHeights().size() * 4 * sizeof(float), &chunk.GetHeights()[0], GL_DYNAMIC_DRAW);
 	glUniformBlockBinding(shader.Id(), glGetUniformBlockIndex(shader.Id(), "HeightsBlock"), 0);
 
+	shader.SetUniformInt("resolution", resolution);
 	shader.SetUniformMat4("projection", camera.GetProjection());
 	shader.SetUniformMat4("view", camera.GetView());
 	shader.SetUniformMat4("model", glm::translate(
 			glm::mat4(1.0), 
 			glm::vec3(
-				1.0f * (chunk.GetPosition().x * ( CHUNK_WIDTH - 1)), 
+				1.0f * (chunk.GetPosition().x * ( CHUNK_WIDTH )), 
 				0.0f,
-				1.0f * (chunk.GetPosition().y * ( CHUNK_WIDTH - 1)) 
+				1.0f * (chunk.GetPosition().y * ( CHUNK_WIDTH )) 
 			)
 		)
 	);

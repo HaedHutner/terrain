@@ -12,17 +12,17 @@ TerrainChunk::TerrainChunk(glm::ivec2 position, glm::ivec2 size, tools::Matrix<f
 		int x = i % size.x;
 		int y = i / size.y;
 
-		heights[i] = heightMap[y][x];
+		heights[i] = glm::vec4(heightMap[y][x], 0.0f, 0.0f, 0.0f);
 	}
 }
 
 const float TerrainChunk::GetHeightAt(int x, int y) const
 {
 	int k = x + size.x * y;
-	return heights[k];
+	return heights[k].x;
 }
 
-const std::vector<float> &TerrainChunk::GetHeights() const
+const std::vector<glm::vec4>&TerrainChunk::GetHeights() const
 {
 	return heights;
 }

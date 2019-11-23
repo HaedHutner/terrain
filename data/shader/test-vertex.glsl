@@ -8,18 +8,22 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 
-layout ( binding = 0 ) uniform HeightsBlock 
+uniform int resolution;
+
+layout (binding=0) uniform HeightsBlock 
 {
 	float values[chunkSize * chunkSize];
 };
 
 void main () {
+	int chunkWidth = chunkSize / resolution;
+
 	vec4 truePosition = vec4(
 		position.x,
-		100.0 * values[position.y + chunkSize * position.x], 
+		values[position.y + chunkWidth * position.x], 
 		position.y,
 		1.0
 	);
 
-	gl_Position = projection * view * model * truePosition;
+	gl_Position = projection * view * model * truePosition;	
 }

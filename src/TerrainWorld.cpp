@@ -24,7 +24,9 @@ const TerrainChunk TerrainWorld::FetchChunkAt(glm::ivec2 absoluteCoordinates)
 			{ CHUNK_WIDTH, CHUNK_WIDTH },
 			heightMapGenerator.GenerateHeightMap(
 				chunkCoordinates * CHUNK_WIDTH,
-				{ CHUNK_WIDTH, CHUNK_WIDTH }
+				{ CHUNK_WIDTH, CHUNK_WIDTH },
+				0.0f,
+				HEIGHT_AMPLIFICATION
 			)
 		);
 
@@ -57,7 +59,9 @@ const std::vector<TerrainChunk> TerrainWorld::FetchChunksAt(glm::ivec2 absoluteC
 						{ CHUNK_WIDTH, CHUNK_WIDTH },
 						heightMapGenerator.GenerateHeightMap(
 							chunkCoordinates * CHUNK_WIDTH,
-							{ CHUNK_WIDTH, CHUNK_WIDTH }
+							{ CHUNK_WIDTH, CHUNK_WIDTH },
+							0.0f,
+							HEIGHT_AMPLIFICATION
 						)
 					);
 
@@ -87,7 +91,9 @@ const void TerrainWorld::GenerateChunkAt(glm::ivec2 absoluteCoordinates)
 			{ CHUNK_WIDTH, CHUNK_WIDTH },
 			heightMapGenerator.GenerateHeightMap(
 				chunkCoordinates * CHUNK_WIDTH,
-				{ CHUNK_WIDTH, CHUNK_WIDTH }
+				{ CHUNK_WIDTH, CHUNK_WIDTH },
+				0.0f,
+				HEIGHT_AMPLIFICATION
 			)
 		);
 
@@ -116,7 +122,9 @@ const void TerrainWorld::GenerateChunksAt(glm::ivec2 absoluteCoordinates, int ra
 						{ CHUNK_WIDTH, CHUNK_WIDTH },
 						heightMapGenerator.GenerateHeightMap(
 							chunkCoordinates * CHUNK_WIDTH,
-							{ CHUNK_WIDTH, CHUNK_WIDTH }
+							{ CHUNK_WIDTH, CHUNK_WIDTH },
+							0.0f,
+							HEIGHT_AMPLIFICATION
 						)
 					);
 
