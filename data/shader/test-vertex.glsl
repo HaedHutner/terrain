@@ -46,23 +46,25 @@ vec3 CalculateNormalForVertex(int index, int x, int y) {
 	vec3 v3;
 
 	if (x == 0 && y == 0) {
-		v2 = - vec3(x + 2, values[y + 1 + chunkWidth*(x + 2)][0], y + 1);
-		v3 = - vec3(x + 1, values[y + 2 + chunkWidth*(x + 1)][0], y + 2);
-	}
-
-	if (x != 0 && y == 0) {
-		v2 = vec3(x - 1, values[y + chunkWidth*(x - 1)][0], y);
-		v3 = - vec3(x, values[y + 1 + chunkWidth*x][0], y + 1);
-	}
-
-	if (x == 0 && y != 0) {
-		v2 = - vec3(x - 1, values[y + chunkWidth*(x - 1)][0], y);
-		v3 = vec3(x, values[y - 1 + chunkWidth*x][0], y - 1);
-	}
-
-	if (x != 0 && y != 0) {
-		v2 = vec3(x - 1, values[y + chunkWidth*(x - 1)][0], y);
-		v3 = vec3(x, values[y - 1 + chunkWidth*x][0], y - 1);
+		int vX = x + 1;
+		int vY = y + 1;
+		v2 = - vec3(x, values[vY + chunkWidth*x][0], vY);
+		v3 = - vec3(vX, values[y + chunkWidth*vX][0], y);
+	} else if (x != 0 && y == 0) {
+		int vX = x - 1;
+		int vY = y + 1;
+		v2 = vec3(x, values[vY + chunkWidth*x][0], vY);
+		v3 = - vec3(vX, values[y + chunkWidth*vX][0], y);
+	} else if (x == 0 && y != 0) {
+		int vX = x + 1;
+		int vY = y - 1;
+		v2 = - vec3(x, values[vY + chunkWidth*x][0], vY);
+		v3 = vec3(vX, values[y + chunkWidth*vX][0], y);
+	} else if (x != 0 && y != 0) {
+		int vX = x - 1;
+		int vY = y - 1;
+		v2 = vec3(x, values[vY + chunkWidth*x][0], vY);
+		v3 = vec3(vX, values[y + chunkWidth*vX][0], y);
 	}
 
 	return CalculateNormal(v1, v2, v3);
