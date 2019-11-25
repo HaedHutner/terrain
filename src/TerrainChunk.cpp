@@ -6,7 +6,7 @@ TerrainChunk::TerrainChunk()
 }
 
 TerrainChunk::TerrainChunk(glm::ivec2 position, glm::ivec2 size, tools::Matrix<float> heightMap)
-	: position(position), middlePoint({ position.x + (size.x / 2), position.y + (size.y / 2) }), size(size), heights(size.x * size.y)
+	: position(position), middlePoint({ position.x + (size.x / 2), position.y + (size.y / 2) }), size(size), heights(size.x * size.y), normals(size.x * size.y)
 {
 	for (int i = 0; i < size.x * size.y; i++) {
 		int x = i % size.x;

@@ -13,6 +13,8 @@ private:
 
     std::vector<glm::vec4> heights;
 
+	std::vector<glm::vec4> normals;
+
 	glm::ivec2 position;
 
 	glm::vec2 middlePoint;

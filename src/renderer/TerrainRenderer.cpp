@@ -36,6 +36,7 @@ void TerrainRenderer::StartRenderer()
 	// Window resize callback
 	glfwSetWindowSizeCallback(window, [](GLFWwindow *window, int width, int height){
 	    glViewport(0, 0, width, height);
+		// camera.UpdateProjection(width, height);
 	});
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -47,7 +48,15 @@ void TerrainRenderer::StartRenderer()
 	const GLubyte* vendor = glGetString(GL_VENDOR); // Returns the vendor
 	const GLubyte* renderer = glGetString(GL_RENDERER); // Returns a hint to the model
 
+	GLint maxSizeTBO, maxSizeUBO, maxSizeSSBO;
+	glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &maxSizeTBO);
+	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxSizeUBO);
+	glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxSizeSSBO);
+
 	printf("%s %s OpenGL %d.%d\n", vendor, renderer, GLVersion.major, GLVersion.minor);
+	printf("Max TBO size in bytes: %d\n", maxSizeTBO * sizeof(glm::vec4));
+	printf("Max UBO size in bytes: %d\n", maxSizeUBO);
+	printf("Max SSBO size in bytes: %d\n", maxSizeSSBO);
 
 	shader = Shader::FromFiles("./data/shader/test-vertex.glsl", "./data/shader/test-fragment.glsl");
 
@@ -57,12 +66,17 @@ void TerrainRenderer::StartRenderer()
 
 	glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1.0);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	shader.Use();
 
+	glEnable(GL_DEPTH_TEST);
+
 	while (!glfwWindowShouldClose(window))
 	{
+		glClearDepth(GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		m.lock();
 		camera.ProcessKeyInput(window);
 		std::vector<TerrainChunk> chunks = world.FetchCachedChunksAt({ (int) camera.GetPosition().x, (int) camera.GetPosition().z }, 4);
@@ -82,8 +96,6 @@ void TerrainRenderer::StartRenderer()
 
 	    glfwSwapBuffers(window);
 	    glfwPollEvents();
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	glfwDestroyWindow(window);
@@ -107,7 +119,7 @@ void TerrainRenderer::GenerateChunkMesh(TerrainChunk& chunk, int& resolution)
 	}
 
 	int sideSize = (chunk.GetSize().x / resolution) ;
-	int verticesSize = (chunk.GetHeights().size() / resolution);
+	int verticesSize = sideSize * sideSize;
 
 	std::vector<GLuint> elements = std::vector<GLuint>(verticesSize * 6);
 	std::vector<glm::ivec2> vertices = std::vector<glm::ivec2>(verticesSize);
@@ -126,7 +138,7 @@ void TerrainRenderer::GenerateChunkMesh(TerrainChunk& chunk, int& resolution)
 
 		vertices[i] = glm::ivec2(x, y);
 
-		if ((x == 0 || y == 0)) continue;
+		if (x == 0 || y == 0) continue;
 
 		elements[j    ] = i;
 		elements[j - 1] = i - sideSize;
@@ -146,7 +158,7 @@ void TerrainRenderer::BindChunkMesh(TerrainChunk& chunk, int &resolution)
 {
 	cachedMeshes[resolution].Bind();
 
-	glBufferData(GL_UNIFORM_BUFFER, chunk.GetHeights().size() * 4 * sizeof(float), &chunk.GetHeights()[0], GL_DYNAMIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, chunk.GetHeights().size() * sizeof(glm::vec4), &chunk.GetHeights()[0], GL_DYNAMIC_DRAW);
 	glUniformBlockBinding(shader.Id(), glGetUniformBlockIndex(shader.Id(), "HeightsBlock"), 0);
 
 	shader.SetUniformInt("resolution", resolution);
