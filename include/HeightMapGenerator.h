@@ -8,6 +8,9 @@
 #include <Matrix.h>
 
 class HeightMapGenerator : public MatrixGenerator {
+
+	float GetHeight(glm::vec2 position);
+
 public:
 
     HeightMapGenerator(const FastNoise::NoiseType &noiseType = FastNoise::NoiseType::PerlinFractal, const int &seed = 1337);

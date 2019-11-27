@@ -53,6 +53,8 @@ private:
 
 	ChunkGrid grid;
 
+	TerrainChunk GenerateAndCacheSingleChunk(const glm::ivec2 &chunkCoordinates, const glm::ivec2 &size, const float &amplification);
+
 public:
 
 	TerrainWorld();

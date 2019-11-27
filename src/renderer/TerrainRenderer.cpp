@@ -1,7 +1,7 @@
 ﻿#include <renderer/TerrainRenderer.h>
 
 TerrainRenderer::TerrainRenderer(std::mutex &m, TerrainWorld &world, Camera &camera, std::atomic<bool> &isWorking)
-	: m(m), world(world), camera(camera), isWorking(isWorking)
+	: m(m), world(world), camera(camera), isWorking(isWorking), theSun(0.0f, 0.8f, 0.0f)
 {
 }
 
@@ -54,7 +54,7 @@ void TerrainRenderer::StartRenderer()
 	glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxSizeSSBO);
 
 	printf("%s %s OpenGL %d.%d\n", vendor, renderer, GLVersion.major, GLVersion.minor);
-	printf("Max TBO size in bytes: %d\n", maxSizeTBO * sizeof(glm::vec4));
+	printf("Max TBO size in bytes: %d\n", maxSizeTBO);
 	printf("Max UBO size in bytes: %d\n", maxSizeUBO);
 	printf("Max SSBO size in bytes: %d\n", maxSizeSSBO);
 
@@ -71,6 +71,8 @@ void TerrainRenderer::StartRenderer()
 	shader.Use();
 
 	glEnable(GL_DEPTH_TEST);
+
+	//float sunDir = -0.01f;
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -93,6 +95,14 @@ void TerrainRenderer::StartRenderer()
 		glfwGetCursorPos(window, &cursorX, &cursorY);
 
 		camera.ProcessMouseInput(window, cursorX, cursorY);
+
+		//if (theSun.y <= -0.8f) {
+		//	sunDir = + 0.01f;
+		//} else if (theSun.y >= 1.0f) {
+		//	sunDir = - 0.01f;
+		//}
+
+		//theSun.y += sunDir;
 
 	    glfwSwapBuffers(window);
 	    glfwPollEvents();
@@ -118,20 +128,18 @@ void TerrainRenderer::GenerateChunkMesh(TerrainChunk& chunk, int& resolution)
 		return;
 	}
 
-	int sideSize = (chunk.GetSize().x / resolution) ;
+	int sideSize = ((chunk.GetSize().x - 1) / resolution) ;
 	int verticesSize = sideSize * sideSize;
 
 	std::vector<GLuint> elements = std::vector<GLuint>(verticesSize * 6);
 	std::vector<glm::ivec2> vertices = std::vector<glm::ivec2>(verticesSize);
 
-	//			  i +---+ i + 1
-	//				|\  |
-	//				| \ |
-	//				|  \|
-	// i + sideSize +---+ i + sizeSize + 1
-	//
-	//
-	int j = sideSize + 1;
+	//            i - 1 +---+ i 
+	//			    	|\  |
+	//		    		| \ |
+	//	     			|  \|
+	// i - sideSize - 1 +---+ i - sideSize
+	int j = 5;
 	for (int i = 0; i < verticesSize; i++) {
 		int x = i % sideSize;
 		int y = i / sideSize;
@@ -140,12 +148,12 @@ void TerrainRenderer::GenerateChunkMesh(TerrainChunk& chunk, int& resolution)
 
 		if (x == 0 || y == 0) continue;
 
-		elements[j    ] = i;
+		elements[j] = i;
 		elements[j - 1] = i - sideSize;
-		elements[j - 2] = i - sideSize - 1;
-		elements[j - 3] = i - sideSize - 1;
-		elements[j - 4] = i - 1;
-		elements[j - 5] = i;
+		elements[j - 2] = i - 1;
+		elements[j - 3] = i - 1;
+		elements[j - 4] = i - sideSize - 1;
+		elements[j - 5] = i - sideSize;
 
 		j += 6;
 	}
@@ -158,18 +166,19 @@ void TerrainRenderer::BindChunkMesh(TerrainChunk& chunk, int &resolution)
 {
 	cachedMeshes[resolution].Bind();
 
-	glBufferData(GL_UNIFORM_BUFFER, chunk.GetHeights().size() * sizeof(glm::vec4), &chunk.GetHeights()[0], GL_DYNAMIC_DRAW);
-	glUniformBlockBinding(shader.Id(), glGetUniformBlockIndex(shader.Id(), "HeightsBlock"), 0);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, chunk.GetHeights().size() * sizeof(glm::vec4), &chunk.GetHeights()[0], GL_DYNAMIC_DRAW);
 
+	shader.SetUniformVec3("cameraPosition", camera.GetPosition());
+	shader.SetUniformVec3("theSun", theSun);
 	shader.SetUniformInt("resolution", resolution);
 	shader.SetUniformMat4("projection", camera.GetProjection());
 	shader.SetUniformMat4("view", camera.GetView());
 	shader.SetUniformMat4("model", glm::translate(
 			glm::mat4(1.0), 
 			glm::vec3(
-				1.0f * (chunk.GetPosition().x * ( CHUNK_WIDTH )), 
+				1.0f * (chunk.GetPosition().x) * ( chunk.GetSize().x - 2 ),
 				0.0f,
-				1.0f * (chunk.GetPosition().y * ( CHUNK_WIDTH )) 
+				1.0f * (chunk.GetPosition().y) * ( chunk.GetSize().y - 2 )
 			)
 		)
 	);

@@ -1,5 +1,22 @@
 #include <TerrainWorld.h>
 
+TerrainChunk TerrainWorld::GenerateAndCacheSingleChunk(const glm::ivec2 &chunkCoordinates, const glm::ivec2 &size, const float &amplification)
+{
+	TerrainChunk newTerrainChunk = TerrainChunk(
+		chunkCoordinates,
+		heightMapGenerator.GenerateHeightMap(
+			chunkCoordinates *( size.x - 1 ),
+			{ size.x + 1, size.y + 1 }, // Increase size of heightmap by 1 in each direction to create skirt of extra vertices for later use ( like in normal calculations )
+			0.0f,
+			amplification
+		)
+	);
+
+	grid.Insert(chunkCoordinates, newTerrainChunk);
+
+	return newTerrainChunk;
+}
+
 TerrainWorld::TerrainWorld()
 {
 }
@@ -19,20 +36,7 @@ const TerrainChunk TerrainWorld::FetchChunkAt(glm::ivec2 absoluteCoordinates)
 		return chunk.value();
 	}
 	else {
-		TerrainChunk newTerrainChunk = TerrainChunk(
-			chunkCoordinates,
-			{ CHUNK_WIDTH, CHUNK_WIDTH },
-			heightMapGenerator.GenerateHeightMap(
-				chunkCoordinates * CHUNK_WIDTH,
-				{ CHUNK_WIDTH, CHUNK_WIDTH },
-				0.0f,
-				HEIGHT_AMPLIFICATION
-			)
-		);
-
-		grid.Insert(chunkCoordinates, newTerrainChunk);
-
-		return newTerrainChunk;
+		return GenerateAndCacheSingleChunk(chunkCoordinates, { CHUNK_WIDTH, CHUNK_WIDTH }, 100.0f);
 	}
 }
 
@@ -54,18 +58,7 @@ const std::vector<TerrainChunk> TerrainWorld::FetchChunksAt(glm::ivec2 absoluteC
 					result.push_back(chunk.value());
 				}
 				else {
-					TerrainChunk newTerrainChunk = TerrainChunk(
-						chunkCoordinates,
-						{ CHUNK_WIDTH, CHUNK_WIDTH },
-						heightMapGenerator.GenerateHeightMap(
-							chunkCoordinates * CHUNK_WIDTH,
-							{ CHUNK_WIDTH, CHUNK_WIDTH },
-							0.0f,
-							HEIGHT_AMPLIFICATION
-						)
-					);
-
-					grid.Insert(chunkCoordinates, newTerrainChunk);
+					TerrainChunk newTerrainChunk = GenerateAndCacheSingleChunk(chunkCoordinates, { CHUNK_WIDTH, CHUNK_WIDTH }, 100.0f);
 
 					result.push_back(newTerrainChunk);
 				}
@@ -86,18 +79,7 @@ const void TerrainWorld::GenerateChunkAt(glm::ivec2 absoluteCoordinates)
 		return;
 	}
 	else {
-		TerrainChunk newTerrainChunk = TerrainChunk(
-			chunkCoordinates,
-			{ CHUNK_WIDTH, CHUNK_WIDTH },
-			heightMapGenerator.GenerateHeightMap(
-				chunkCoordinates * CHUNK_WIDTH,
-				{ CHUNK_WIDTH, CHUNK_WIDTH },
-				0.0f,
-				HEIGHT_AMPLIFICATION
-			)
-		);
-
-		grid.Insert(chunkCoordinates, newTerrainChunk);
+		GenerateAndCacheSingleChunk(chunkCoordinates, { CHUNK_WIDTH, CHUNK_WIDTH }, 100.0f);
 	}
 }
 
@@ -117,18 +99,7 @@ const void TerrainWorld::GenerateChunksAt(glm::ivec2 absoluteCoordinates, int ra
 					continue;
 				}
 				else {
-					TerrainChunk newTerrainChunk = TerrainChunk(
-						chunkCoordinates,
-						{ CHUNK_WIDTH, CHUNK_WIDTH },
-						heightMapGenerator.GenerateHeightMap(
-							chunkCoordinates * CHUNK_WIDTH,
-							{ CHUNK_WIDTH, CHUNK_WIDTH },
-							0.0f,
-							HEIGHT_AMPLIFICATION
-						)
-					);
-
-					grid.Insert(chunkCoordinates, newTerrainChunk);
+					GenerateAndCacheSingleChunk(chunkCoordinates, { CHUNK_WIDTH, CHUNK_WIDTH }, 100.0f);
 				}
 			}
 		}

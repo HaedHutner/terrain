@@ -1,4 +1,4 @@
-#version 420
+#version 430
 
 const int chunkSize = 64;
 
@@ -10,14 +10,13 @@ uniform mat4 model;
 
 uniform int resolution;
 
-layout (std140, binding = 0) uniform HeightsBlock 
+layout (std430, binding = 0) buffer HeightsBlock 
 {
-	vec4 values[chunkSize * chunkSize];
+	vec4 values[(chunkSize + 1) * (chunkSize + 1)];
 };
 
-int chunkWidth = chunkSize / resolution;
-
 out vec3 normal;
+out vec3 fragPosition;
 
 vec3 CalculateNormalForVertex(int index, int x, int y);
 
@@ -25,46 +24,50 @@ void main () {
 
 	int x = position.x;
 	int y = position.y;
-	int index = y + chunkWidth * x;
+	int index = y + (chunkSize + 1) * x;
 
-	vec4 truePosition = vec4(x, values[index][0], y, 1.0);
+	vec4 truePosition = vec4(x, values[index].x, y, 1.0);
 
 	normal = CalculateNormalForVertex(index, x, y);
 
-	gl_Position = projection * view * model * truePosition;	
+	gl_Position = projection * view * model * truePosition;
+
+	fragPosition = vec3(model * truePosition);
 }
 
 vec3 CalculateNormal(vec3 vertex, vec3 v1, vec3 v2) {
-	return -1 * cross (v1 - vertex, v2 - vertex);
+	return cross (v1 - vertex, v2 - vertex);
 	//return ( cross(vertex, v1) - cross(vertex, v2) );
 };
 
 vec3 CalculateNormalForVertex(int index, int x, int y) {
-	vec3 v1 = vec3(x, values[index][0], y);
+	vec3 v1 = vec3(x, values[index].x, y);
 
 	vec3 v2;
 	vec3 v3;
 
-	if (x == 0 && y == 0) {
-		int vX = x + 1;
-		int vY = y + 1;
-		v2 = - vec3(x, values[vY + chunkWidth*x][0], vY);
-		v3 = - vec3(vX, values[y + chunkWidth*vX][0], y);
-	} else if (x != 0 && y == 0) {
-		int vX = x - 1;
-		int vY = y + 1;
-		v2 = vec3(x, values[vY + chunkWidth*x][0], vY);
-		v3 = - vec3(vX, values[y + chunkWidth*vX][0], y);
-	} else if (x == 0 && y != 0) {
-		int vX = x + 1;
-		int vY = y - 1;
-		v2 = - vec3(x, values[vY + chunkWidth*x][0], vY);
-		v3 = vec3(vX, values[y + chunkWidth*vX][0], y);
-	} else if (x != 0 && y != 0) {
+	int chunkWidth = chunkSize + 1;
+
+	if (x == chunkSize && y == chunkSize) {
 		int vX = x - 1;
 		int vY = y - 1;
-		v2 = vec3(x, values[vY + chunkWidth*x][0], vY);
-		v3 = vec3(vX, values[y + chunkWidth*vX][0], y);
+		v2 = - vec3(x, values[vY + chunkWidth*x].x, vY);
+		v3 = - vec3(vX, values[y + chunkWidth*vX].x, y);
+	} else if (x != chunkSize && y == chunkSize) {
+		int vX = x + 1;
+		int vY = y - 1;
+		v2 = vec3(x, values[vY + chunkWidth*x].x, vY);
+		v3 = - vec3(vX, values[y + chunkWidth*vX].x, y);
+	} else if (x == chunkSize && y != chunkSize) {
+		int vX = x - 1;
+		int vY = y + 1;
+		v2 = - vec3(x, values[vY + chunkWidth*x].x, vY);
+		v3 = vec3(vX, values[y + chunkWidth*vX].x, y);
+	} else if (x != chunkSize && y != chunkSize) {
+		int vX = x + 1;
+		int vY = y + 1;
+		v2 = vec3(x, values[vY + chunkWidth*x].x, vY);
+		v3 = vec3(vX, values[y + chunkWidth*vX].x, y);
 	}
 
 	return CalculateNormal(v1, v2, v3);

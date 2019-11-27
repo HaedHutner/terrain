@@ -5,8 +5,8 @@ TerrainChunk::TerrainChunk()
 {
 }
 
-TerrainChunk::TerrainChunk(glm::ivec2 position, glm::ivec2 size, tools::Matrix<float> heightMap)
-	: position(position), middlePoint({ position.x + (size.x / 2), position.y + (size.y / 2) }), size(size), heights(size.x * size.y), normals(size.x * size.y)
+TerrainChunk::TerrainChunk(glm::ivec2 position, tools::Matrix<float> heightMap)
+	: position(position), middlePoint({ position.x + (heightMap[0].size() / 2), position.y + (heightMap.size() / 2) }), size({heightMap[0].size(), heightMap.size()}), heights(heightMap[0].size() * heightMap.size())
 {
 	for (int i = 0; i < size.x * size.y; i++) {
 		int x = i % size.x;
@@ -40,4 +40,9 @@ const glm::ivec2 &TerrainChunk::GetPosition() const
 const glm::ivec2 &TerrainChunk::GetSize() const
 {
 	return size;
+}
+
+const AABB& TerrainChunk::GetAABB() const
+{
+	return AABB(glm::vec3(), glm::vec3());
 }

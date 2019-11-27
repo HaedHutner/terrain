@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 
 #include <Matrix.h>
+#include <renderer/AABB.h>
 
 class TerrainChunk {
 
@@ -13,19 +14,19 @@ private:
 
     std::vector<glm::vec4> heights;
 
-	std::vector<glm::vec4> normals;
-
 	glm::ivec2 position;
 
 	glm::vec2 middlePoint;
 
 	glm::ivec2 size;
 
+	// AABB aabb;
+
 public:
 
 	TerrainChunk();
 
-	TerrainChunk(glm::ivec2 position, glm::ivec2 size, tools::Matrix<float> heightMap);
+	TerrainChunk(glm::ivec2 position, tools::Matrix<float> heightMap);
 
 	const float GetHeightAt(int x, int y) const;
 
@@ -37,6 +38,7 @@ public:
 
 	const glm::ivec2 &GetSize() const;
 
+	const AABB &GetAABB() const;
 };
 
 #endif

@@ -8,9 +8,9 @@
 
 class Mesh {
 
-	GLuint vao, ebo, vbo, ubo;
-
 	GLuint sizeIndices;
+
+	GLuint vao, ebo, vbo, ubo;
 
 public:
 

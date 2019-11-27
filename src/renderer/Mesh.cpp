@@ -39,8 +39,8 @@ void Mesh::Bind()
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
-	glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ubo);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ubo);
 }
 
 

@@ -31,6 +31,8 @@ class TerrainRenderer {
 
 	Shader shader;
 
+	glm::vec3 theSun;
+
 	void DrawSingleTerrainChunk(TerrainChunk &chunk, int &resolution);
 
 	void GenerateChunkMesh(TerrainChunk &chunk, int& resolution);
