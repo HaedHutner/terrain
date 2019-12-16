@@ -1,5 +1,9 @@
 #include "..\..\include\renderer\Mesh.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+
+#include <stb_image.h>
+
 Mesh::Mesh()
 {
 }
@@ -25,23 +29,64 @@ Mesh::Mesh(std::vector<GLuint>& elements, std::vector<glm::ivec2>& vertices)
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ubo);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ubo);
 	
-
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	int width, height, nrChannels;
+	unsigned char* textureData;
 
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	// LOAD GRASS TEXTURE
+
+	glGenTextures(1, &grassTexture);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, grassTexture);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	int width, height, nrChannels;
-	unsigned char* textureData = stbi_load("./data/texture/ground/Ground_Dirt_005_COLOR.jpg", &width, &height, &nrChannels, 0);
+	textureData = stbi_load("./data/texture/ground/Grass_001_COLOR.jpg", &width, &height, &nrChannels, 0);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	stbi_image_free(textureData);
+
+	// LOAD ROCK TEXTURE
+
+	glGenTextures(1, &rockTexture);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, rockTexture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	textureData = stbi_load("./data/texture/ground/Rock_028_COLOR.jpg", &width, &height, &nrChannels, 0);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	stbi_image_free(textureData);
+
+	// LOAD DIRT TEXTURE
+
+	glGenTextures(1, &dirtTexture);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, dirtTexture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	textureData = stbi_load("./data/texture/ground/Ground_Dirt_005_COLOR.jpg", &width, &height, &nrChannels, 0);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
 	glGenerateMipmap(GL_TEXTURE_2D);
@@ -67,6 +112,15 @@ void Mesh::Bind()
 
 void Mesh::Draw()
 {
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, grassTexture);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, rockTexture);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, dirtTexture);
+
 	glDrawElements(GL_TRIANGLES, sizeIndices, GL_UNSIGNED_INT, NULL);
 
 	glDisableVertexAttribArray(0);

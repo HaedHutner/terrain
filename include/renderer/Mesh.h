@@ -6,13 +6,13 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include <stb_image.h>
-
 class Mesh {
 
 	GLuint sizeIndices;
 
 	GLuint vao, ebo, vbo, ubo;
+
+	GLuint grassTexture, dirtTexture, rockTexture;
 
 public:
 

@@ -1,4 +1,4 @@
-#version 430
+﻿#version 430
 
 const int chunkSize = 64;
 
@@ -13,12 +13,19 @@ uniform int resolution;
 layout (std430, binding = 0) buffer HeightsBlock 
 {
 	vec4 values[(chunkSize + 1) * (chunkSize + 1)];
-	vec4 UVs[(chunkSize + 1) * (chunkSize + 1)];
 };
 
 out vec3 normal;
 out vec3 fragPosition;
 out vec2 uv;
+
+out float mixRatio;
+
+float PHI = 1.61803398874989484820459;  // Φ = Golden Ratio   
+
+float gold_noise(in vec2 xy, in float seed){
+       return fract(tan(distance(xy*PHI, xy)*seed)*xy.x);
+}
 
 vec3 CalculateNormalForVertex(int index, int x, int y);
 
@@ -32,9 +39,11 @@ void main () {
 
 	normal = CalculateNormalForVertex(index, x, y);
 
-	uv = vec2(x, y);
+	uv = vec2(float(x) / float(4), float(y) / float(4));
 
 	gl_Position = projection * view * model * truePosition;
+
+	mixRatio = gold_noise(vec2(truePosition.x, truePosition.y), 1337);
 
 	fragPosition = vec3(model * truePosition);
 }
