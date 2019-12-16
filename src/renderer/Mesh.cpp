@@ -22,9 +22,31 @@ Mesh::Mesh(std::vector<GLuint>& elements, std::vector<glm::ivec2>& vertices)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, elements.size() * sizeof(GLuint), &elements[0], GL_STATIC_DRAW);
 
 	glGenBuffers(1, &ubo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ubo);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ubo);
+	
 
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height, nrChannels;
+	unsigned char* textureData = stbi_load("./data/texture/ground/Ground_Dirt_005_COLOR.jpg", &width, &height, &nrChannels, 0);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	stbi_image_free(textureData);
 
 	glBindVertexArray(0);
 }
@@ -36,9 +58,7 @@ void Mesh::Bind()
 	glBindVertexArray(vao);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ubo);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ubo);
 }

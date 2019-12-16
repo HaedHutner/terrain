@@ -35,11 +35,7 @@ class TerrainRenderer {
 
 	void DrawSingleTerrainChunk(TerrainChunk &chunk, int &resolution);
 
-	void GenerateChunkMesh(TerrainChunk &chunk, int& resolution);
-
-	void BindChunkMesh(TerrainChunk &chunk, int &resolution);
-
-	void DrawChunkMesh(TerrainChunk &chunk, int &resolution);
+	void UpdateViewport(int width, int height);
 
 public:
 

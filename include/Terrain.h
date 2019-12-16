@@ -16,7 +16,7 @@
 
 class Terrain {
 
-	int screenX = 800, screenY = 600;
+	int screenX = 1280, screenY = 720;
 
 	std::atomic<bool> isWorking{ true };
 

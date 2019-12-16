@@ -10,14 +10,18 @@ uniform vec3 theSun;
 
 uniform vec3 cameraPosition;
 
+uniform sampler2D colorTexture;
+
 in vec3 normal;
 in vec3 fragPosition;
+in vec2 uv;
 
 out vec4 finalColor;
 
 void main () {
 	vec3 viewDir = normalize(cameraPosition - fragPosition);
 	vec3 reflectDir = reflect(- theSun, normal);
+	vec3 rgb_normal = normal * 0.5 + 0.5;
 
 	vec3 norm = normalize(normal);
 	vec3 lightDir = theSun;

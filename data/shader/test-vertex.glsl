@@ -13,10 +13,12 @@ uniform int resolution;
 layout (std430, binding = 0) buffer HeightsBlock 
 {
 	vec4 values[(chunkSize + 1) * (chunkSize + 1)];
+	vec4 UVs[(chunkSize + 1) * (chunkSize + 1)];
 };
 
 out vec3 normal;
 out vec3 fragPosition;
+out vec2 uv;
 
 vec3 CalculateNormalForVertex(int index, int x, int y);
 
@@ -29,6 +31,8 @@ void main () {
 	vec4 truePosition = vec4(x, values[index].x, y, 1.0);
 
 	normal = CalculateNormalForVertex(index, x, y);
+
+	uv = vec2(x, y);
 
 	gl_Position = projection * view * model * truePosition;
 

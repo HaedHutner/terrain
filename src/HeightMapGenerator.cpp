@@ -2,13 +2,21 @@
 
 float HeightMapGenerator::GetHeight(glm::vec2 position)
 {
-	return fastNoise.GetPerlinFractal(position.x, position.y);
+	//return - fastNoise.GetCellular(position.x, position.y);
+	return (((fastNoise.GetNoise(position.x, position.y) + (FN_DECIMAL) 0.5f) * (fastNoise.GetCellular(position.x, position.y))) - (FN_DECIMAL) 0.7f);
 }
 
 HeightMapGenerator::HeightMapGenerator(const FastNoise::NoiseType &noiseType, const int &seed)
 	: MatrixGenerator(noiseType, seed)
 {
-	fastNoise.SetFractalOctaves(4);
+	fastNoise.SetNoiseType(FastNoise::NoiseType::PerlinFractal);
+	fastNoise.SetFractalType(FastNoise::FractalType::FBM);
+	fastNoise.SetFractalOctaves(5);
+
+	fastNoise.SetCellularDistanceFunction(FastNoise::CellularDistanceFunction::Euclidean);
+	fastNoise.SetCellularReturnType(FastNoise::CellularReturnType::Distance2Add);
+	fastNoise.SetFrequency(0.004f);
+	fastNoise.SetInterp(FastNoise::Interp::Quintic);
 }
 
 tools::Matrix<float> HeightMapGenerator::GenerateHeightMap(const glm::ivec2 &startingPosition, const glm::ivec2 &sizeLimits, const float &startingHeight, const float &heightModifier) {
