@@ -7,7 +7,7 @@ TerrainChunk TerrainWorld::GenerateAndCacheSingleChunk(const glm::ivec2 &chunkCo
 		heightMapGenerator.GenerateHeightMap(
 			chunkCoordinates *( size.x - 1 ),
 			{ size.x + 1, size.y + 1 }, // Increase size of heightmap by 1 in each direction to create skirt of extra vertices for later use ( like in normal calculations )
-			0.0f,
+			128.0f,
 			amplification
 		)
 	);
@@ -36,7 +36,7 @@ const TerrainChunk TerrainWorld::FetchChunkAt(glm::ivec2 absoluteCoordinates)
 		return chunk.value();
 	}
 	else {
-		return GenerateAndCacheSingleChunk(chunkCoordinates, { CHUNK_WIDTH, CHUNK_WIDTH }, 100.0f);
+		return GenerateAndCacheSingleChunk(chunkCoordinates, { CHUNK_WIDTH, CHUNK_WIDTH }, 255.0f);
 	}
 }
 
@@ -79,7 +79,7 @@ const void TerrainWorld::GenerateChunkAt(glm::ivec2 absoluteCoordinates)
 		return;
 	}
 	else {
-		GenerateAndCacheSingleChunk(chunkCoordinates, { CHUNK_WIDTH, CHUNK_WIDTH }, 100.0f);
+		GenerateAndCacheSingleChunk(chunkCoordinates, { CHUNK_WIDTH, CHUNK_WIDTH }, 255.0f);
 	}
 }
 
@@ -99,7 +99,7 @@ const void TerrainWorld::GenerateChunksAt(glm::ivec2 absoluteCoordinates, int ra
 					continue;
 				}
 				else {
-					GenerateAndCacheSingleChunk(chunkCoordinates, { CHUNK_WIDTH, CHUNK_WIDTH }, 100.0f);
+					GenerateAndCacheSingleChunk(chunkCoordinates, { CHUNK_WIDTH, CHUNK_WIDTH }, 255.0f);
 				}
 			}
 		}

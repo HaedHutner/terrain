@@ -12,7 +12,7 @@ class Mesh {
 
 	GLuint vao, ebo, vbo, ubo;
 
-	GLuint grassTexture, dirtTexture, rockTexture;
+	GLuint grassTexture, dirtTexture, rockTexture, snowTexture;
 
 public:
 

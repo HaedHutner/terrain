@@ -86,7 +86,27 @@ Mesh::Mesh(std::vector<GLuint>& elements, std::vector<glm::ivec2>& vertices)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	textureData = stbi_load("./data/texture/ground/Ground_Dirt_005_COLOR.jpg", &width, &height, &nrChannels, 0);
+	textureData = stbi_load("./data/texture/ground/Ground_Dirt_007_basecolor.jpg", &width, &height, &nrChannels, 0);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	stbi_image_free(textureData);
+
+
+	// LOAD SNOW TEXTURE
+
+	glGenTextures(1, &snowTexture);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, snowTexture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	textureData = stbi_load("./data/texture/ground/Snow_001_COLOR.jpg", &width, &height, &nrChannels, 0);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
 	glGenerateMipmap(GL_TEXTURE_2D);
@@ -120,6 +140,9 @@ void Mesh::Draw()
 
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, dirtTexture);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, snowTexture);
 
 	glDrawElements(GL_TRIANGLES, sizeIndices, GL_UNSIGNED_INT, NULL);
 

@@ -3,8 +3,9 @@
 float HeightMapGenerator::GetHeight(glm::vec2 position)
 {
 	// return fastNoise.GetCellular(position.x, position.y);
-	// return (((fastNoise.GetNoise(position.x, position.y) + (FN_DECIMAL) 0.5f) * (fastNoise.GetCellular(position.x, position.y))) - (FN_DECIMAL) 0.7f);
-	return fastNoise.GetSimplexFractal(position.x, position.y);
+	 return (((fastNoise.GetNoise(position.x, position.y) + (FN_DECIMAL) 0.5f) * (fastNoise.GetCellular(position.x, position.y))) - (FN_DECIMAL) 0.7f);
+	// return fastNoise.GetSimplexFractal(position.x, position.y);
+	// return fastNoise.GetPerlinFractal(position.x, position.y);
 }
 
 HeightMapGenerator::HeightMapGenerator(const FastNoise::NoiseType &noiseType, const int &seed)

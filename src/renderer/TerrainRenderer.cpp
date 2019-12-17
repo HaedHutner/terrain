@@ -167,6 +167,7 @@ void TerrainRenderer::DrawSingleTerrainChunk(TerrainChunk &chunk, int &resolutio
 	shader.SetUniformInt("grassTexture", 0);
 	shader.SetUniformInt("rockTexture", 1);
 	shader.SetUniformInt("dirtTexture", 2);
+	shader.SetUniformInt("snowTexture", 3);
 
 	shader.SetUniformVec3("cameraPosition", camera.GetPosition());
 	shader.SetUniformVec3("theSun", theSun);
