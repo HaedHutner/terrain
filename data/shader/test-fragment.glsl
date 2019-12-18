@@ -32,7 +32,7 @@ in float mixRatio;
 
 out vec4 finalColor;
 
-float GetFogFactor(float d)
+float GetFogFactor(in float d)
 {
     if (d >= FogMax) return 1;
     if (d <= FogMin) return 0;

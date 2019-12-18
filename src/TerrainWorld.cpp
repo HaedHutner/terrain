@@ -7,7 +7,7 @@ TerrainChunk TerrainWorld::GenerateAndCacheSingleChunk(const glm::ivec2 &chunkCo
 		heightMapGenerator.GenerateHeightMap(
 			chunkCoordinates *( size.x - 1 ),
 			{ size.x + 1, size.y + 1 }, // Increase size of heightmap by 1 in each direction to create skirt of extra vertices for later use ( like in normal calculations )
-			128.0f,
+			0.0f,
 			amplification
 		)
 	);

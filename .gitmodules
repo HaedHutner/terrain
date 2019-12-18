@@ -10,6 +10,6 @@
 [submodule "external/FastNoise"]
 	path = external/fastnoise/FastNoise
 	url = https://github.com/Auburns/FastNoise
-[submodule "external/imgui"]
-	path = external/imgui
-	url = https://github.com/HaedHutner/imgui.git
+[submodule "external/imgui/imgui"]
+	path = external/imgui/imgui
+	url = https://github.com/HaedHutner/imgui
