@@ -1,12 +1,10 @@
 ﻿#version 420
 
-const vec4 FogColor = vec4(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1.0);
-
 const float FogMax = 192.0;
 
 const float FogMin = 162.0;
 
-const vec3 ambient = vec3(0.3, 0.3, 0.3);
+const vec3 ambient = vec3(0.1, 0.1, 0.1);
 
 const float specularStrength = 0.01;
 
@@ -79,7 +77,9 @@ void main () {
 
 	vec3 resultLight = (ambient + diffuse + specular) * lightColor;
 
+	 vec4 fogColor = vec4(0.0, 1.0, 1.0, 1.0); //theSun.y * vec4( smoothstep(1.75, 2.0, (1.0 + theSun.y)) * 255.0 / 255.0, smoothstep(1.0, 1.75, (1.0 + theSun.y)) * 255.0 / 255.0, smoothstep(-1.75, -2.0, - (1.0 + theSun.y)) * 255.0 / 255.0, 1.0);
+
 	float fogAmount = GetFogFactor(distance(cameraPosition, fragPosition));
 
-    finalColor = mix(GetTexturedSurface(norm, resultLight), FogColor, fogAmount);
+    finalColor = mix(GetTexturedSurface(norm, resultLight), fogColor, fogAmount);
 }

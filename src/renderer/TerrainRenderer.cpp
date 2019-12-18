@@ -71,9 +71,11 @@ void TerrainRenderer::StartRenderer()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 420");
 
-	shader = Shader::FromFiles("./data/shader/test-vertex.glsl", "./data/shader/test-fragment.glsl");
+	shader = Shader::FromFiles("./data/shader/terrain-vertex.glsl", "./data/shader/terrain-fragment.glsl");
 
 	glBindAttribLocation(shader.Id(), 0, "position");
+
+	SkyboxRenderer skyboxRenderer = SkyboxRenderer();
 
 	shader.Link();
 
@@ -81,13 +83,12 @@ void TerrainRenderer::StartRenderer()
 
 	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	shader.Use();
-
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
 	glCullFace(GL_BACK);
-	//float sunDir = -0.01f;
+	
+	float sunDegrees = 0.01f;
 
 	bool show_demo_window = true;
 	bool show_another_window = false;
@@ -98,36 +99,28 @@ void TerrainRenderer::StartRenderer()
 		glClearDepth(GL_DEPTH_BUFFER_BIT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		m.lock();
-		camera.ProcessKeyInput(window);
+		skyboxRenderer.Draw(camera);
+
 		std::vector<TerrainChunk> chunks = world.FetchCachedChunksAt({ (int) camera.GetPosition().x, (int) camera.GetPosition().z }, 4);
+		shader.Use();
 
 		for (auto& chunk : chunks) {
 			int resolution = 1;
 			DrawSingleTerrainChunk(chunk, resolution);
 		}
 
-		// printf("Rendered %d cached chunks\n", chunks.size());
-		m.unlock();
-
 		double cursorX, cursorY;
 		glfwGetCursorPos(window, &cursorX, &cursorY);
 
+		camera.ProcessKeyInput(window);
 		camera.ProcessMouseInput(window, cursorX, cursorY);
 
-		//if (theSun.y <= -0.8f) {
-		//	sunDir = + 0.01f;
-		//} else if (theSun.y >= 1.0f) {
-		//	sunDir = - 0.01f;
-		//}
-
-		//theSun.y += sunDir;
+		theSun = glm::rotateX(theSun, sunDegrees);
 
 		// Start the Dear ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-
 
 		static float f = 0.0f;
 		static int counter = 0;
