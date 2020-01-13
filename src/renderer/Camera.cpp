@@ -32,7 +32,7 @@ glm::mat4 Camera::GetProjection() {
 glm::vec3 Camera::GetPosition() { return camera_position; }
 
 void Camera::UpdateProjection(int screenX, int screenY) {
-	projection = glm::perspective(glm::radians(field_of_view), (double) screenX / screenY, 0.1, 1000.0);
+	projection = glm::perspective(glm::radians(field_of_view), (double) screenX / screenY, 0.1, 255.0);
 }
 
 void Camera::ResetCursor(float x, float y) {

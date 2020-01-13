@@ -4,6 +4,10 @@
 
 SkyboxRenderer::SkyboxRenderer()
 {
+}
+
+void SkyboxRenderer::Init(Camera& camera)
+{
 	glGenVertexArrays(1, &skyboxVAO);
 	glBindVertexArray(skyboxVAO);
 
@@ -23,15 +27,15 @@ SkyboxRenderer::SkyboxRenderer()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
 
 	skyboxShader.Use();
-	skyboxShader.SetUniformInt("skyboxTexture", skyboxTexture);
+	skyboxShader.SetUniformInt("skyboxTexture", 0);
 
 	std::vector<std::string> texture_faces = {
-		"./data/texture/sky/miramar_rt.tga",
-		"./data/texture/sky/miramar_lf.tga",
+		"./data/texture/sky/miramar_ft.tga",
+		"./data/texture/sky/miramar_bk.tga",
 		"./data/texture/sky/miramar_up.tga",
 		"./data/texture/sky/miramar_dn.tga",
-		"./data/texture/sky/miramar_ft.tga",
-		"./data/texture/sky/miramar_bk.tga"
+		"./data/texture/sky/miramar_rt.tga",
+		"./data/texture/sky/miramar_lf.tga"
 	};
 
 	int width, height, nrChannels;

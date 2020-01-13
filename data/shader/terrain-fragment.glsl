@@ -1,8 +1,8 @@
 ﻿#version 420
 
-const float FogMax = 192.0;
+const float FogMax = 200.0;
 
-const float FogMin = 162.0;
+const float FogMin = 170.0;
 
 const vec3 ambient = vec3(0.1, 0.1, 0.1);
 
@@ -77,7 +77,7 @@ void main () {
 
 	vec3 resultLight = (ambient + diffuse + specular) * lightColor;
 
-	 vec4 fogColor = vec4(0.0, 1.0, 1.0, 1.0); //theSun.y * vec4( smoothstep(1.75, 2.0, (1.0 + theSun.y)) * 255.0 / 255.0, smoothstep(1.0, 1.75, (1.0 + theSun.y)) * 255.0 / 255.0, smoothstep(-1.75, -2.0, - (1.0 + theSun.y)) * 255.0 / 255.0, 1.0);
+	 vec4 fogColor = vec4(60.0 / 255.0, 68.0 / 255.0, 85.0 / 255.0, 1.0); //theSun.y * vec4( smoothstep(1.75, 2.0, (1.0 + theSun.y)) * 255.0 / 255.0, smoothstep(1.0, 1.75, (1.0 + theSun.y)) * 255.0 / 255.0, smoothstep(-1.75, -2.0, - (1.0 + theSun.y)) * 255.0 / 255.0, 1.0);
 
 	float fogAmount = GetFogFactor(distance(cameraPosition, fragPosition));
 

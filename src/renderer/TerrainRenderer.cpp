@@ -1,7 +1,7 @@
 ﻿#include <renderer/TerrainRenderer.h>
 
 TerrainRenderer::TerrainRenderer(std::mutex &m, TerrainWorld &world, Camera &camera, std::atomic<bool> &isWorking)
-	: m(m), world(world), camera(camera), isWorking(isWorking), theSun(0.0f, 0.8f, 0.0f)
+	: m(m), world(world), camera(camera), isWorking(isWorking), skyboxRenderer(), chunkRenderer(m, world), guiRenderer()
 {
 }
 
@@ -61,25 +61,11 @@ void TerrainRenderer::StartRenderer()
 	printf("Max UBO size in bytes: %d\n", maxSizeUBO);
 	printf("Max SSBO size in bytes: %d\n", maxSizeSSBO);
 
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
+	skyboxRenderer.Init(camera);
+	chunkRenderer.Init(camera);
+	guiRenderer.Init(window, camera);
 
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-	ImGui::StyleColorsDark();
-
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 420");
-
-	shader = Shader::FromFiles("./data/shader/terrain-vertex.glsl", "./data/shader/terrain-fragment.glsl");
-
-	glBindAttribLocation(shader.Id(), 0, "position");
-
-	SkyboxRenderer skyboxRenderer = SkyboxRenderer();
-
-	shader.Link();
-
-	glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1.0);
+	glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
 
 	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -87,53 +73,27 @@ void TerrainRenderer::StartRenderer()
 	glEnable(GL_CULL_FACE);
 
 	glCullFace(GL_BACK);
-	
-	float sunDegrees = 0.01f;
 
 	bool show_demo_window = true;
 	bool show_another_window = false;
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearDepth(GL_DEPTH_BUFFER_BIT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		skyboxRenderer.Draw(camera);
-
-		std::vector<TerrainChunk> chunks = world.FetchCachedChunksAt({ (int) camera.GetPosition().x, (int) camera.GetPosition().z }, 4);
-		shader.Use();
-
-		for (auto& chunk : chunks) {
-			int resolution = 1;
-			DrawSingleTerrainChunk(chunk, resolution);
-		}
-
 		double cursorX, cursorY;
 		glfwGetCursorPos(window, &cursorX, &cursorY);
 
-		camera.ProcessKeyInput(window);
 		camera.ProcessMouseInput(window, cursorX, cursorY);
 
-		theSun = glm::rotateX(theSun, sunDegrees);
+		m.lock();
+		camera.ProcessKeyInput(window);
+		m.unlock();
 
-		// Start the Dear ImGui frame
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-
-		static float f = 0.0f;
-		static int counter = 0;
-
-		ImGui::Begin(" ");    // Create a window called "Hello, world!" and append into it.
-
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
-		ImGui::End();
-
-		ImGui::Render();
-
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		skyboxRenderer.Draw(camera);
+		chunkRenderer.Draw(camera);
+		guiRenderer.Draw(camera);
 
 	    glfwSwapBuffers(window);
 	    glfwPollEvents();
@@ -146,69 +106,3 @@ void TerrainRenderer::StartRenderer()
 	isWorking = false;
 }
 
-void TerrainRenderer::DrawSingleTerrainChunk(TerrainChunk &chunk, int &resolution)
-{
-	if (cachedMeshes.find(resolution) == cachedMeshes.end()) {
-		int sideSize = ((chunk.GetSize().x - 1) / resolution);
-		int verticesSize = sideSize * sideSize;
-
-		std::vector<GLuint> elements = std::vector<GLuint>(verticesSize * 6);
-		std::vector<glm::ivec2> vertices = std::vector<glm::ivec2>(verticesSize);
-		// std::vector<glm::ivec2> uvs = std::vector<glm::ivec2>(verticesSize);
-
-		//            i - 1 +---+ i 
-		//			    	|\  |
-		//		    		| \ |
-		//	     			|  \|
-		// i - sideSize - 1 +---+ i - sideSize
-		int j = 5;
-		for (int i = 0; i < verticesSize; i++) {
-			int x = i % sideSize;
-			int y = i / sideSize;
-
-			vertices[i] = glm::ivec2(x, y);
-			// uvs[i] = vertices[i];
-
-			if (x == 0 || y == 0) continue;
-
-			elements[j] = i - 1;
-			elements[j - 1] = i - sideSize - 1;
-			elements[j - 2] = i - sideSize;
-			elements[j - 3] = i - sideSize;
-			elements[j - 4] = i;
-			elements[j - 5] = i - 1;
-
-			j += 6;
-		}
-
-		Mesh mesh = Mesh(elements, vertices);
-		cachedMeshes[resolution] = mesh;
-	}
-
-	cachedMeshes[resolution].Bind();
-
-	glBufferData(GL_SHADER_STORAGE_BUFFER, chunk.GetHeights().size() * sizeof(glm::vec4), &chunk.GetHeights()[0], GL_DYNAMIC_DRAW);
-	// glBufferSubData(GL_SHADER_STORAGE_BUFFER, chunk.GetHeights().size() * sizeof(glm::vec4), uvs.size() * sizeof(glm::ivec2), &uvs[0]);
-
-	shader.SetUniformInt("grassTexture", 0);
-	shader.SetUniformInt("rockTexture", 1);
-	shader.SetUniformInt("dirtTexture", 2);
-	shader.SetUniformInt("snowTexture", 3);
-
-	shader.SetUniformVec3("cameraPosition", camera.GetPosition());
-	shader.SetUniformVec3("theSun", theSun);
-	shader.SetUniformInt("resolution", resolution);
-	shader.SetUniformMat4("projection", camera.GetProjection());
-	shader.SetUniformMat4("view", camera.GetView());
-	shader.SetUniformMat4("model", glm::translate(
-		glm::mat4(1.0),
-		glm::vec3(
-			1.0f * (chunk.GetPosition().x) * (chunk.GetSize().x - 2),
-			0.0f,
-			1.0f * (chunk.GetPosition().y) * (chunk.GetSize().y - 2)
-		)
-	)
-	);
-
-	cachedMeshes[resolution].Draw();
-}

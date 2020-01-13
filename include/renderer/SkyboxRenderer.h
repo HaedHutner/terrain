@@ -62,6 +62,8 @@ public:
 
 	SkyboxRenderer();
 
+	void Init(Camera &camera);
+
 	void Draw(Camera &camera);
 
 };

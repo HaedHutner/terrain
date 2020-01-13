@@ -3,7 +3,7 @@
 float HeightMapGenerator::GetHeight(glm::vec2 position)
 {
 	// return fastNoise.GetCellular(position.x, position.y);
-	return -fastNoise.GetPerlinFractal(position.x, position.y) * fastNoise.GetPerlin(position.x, position.y);
+	return fastNoise.GetCellular(position.x, position.y); // *fastNoise.GetPerlin(position.x / 0.5f, position.y / 0.5f);
 	// return fastNoise.GetSimplexFractal(position.x, position.y);
 	// return fastNoise.GetPerlinFractal(position.x, position.y);
 }
@@ -12,8 +12,8 @@ HeightMapGenerator::HeightMapGenerator(const FastNoise::NoiseType &noiseType, co
 	: MatrixGenerator(noiseType, seed)
 {
 	fastNoise.SetNoiseType(FastNoise::NoiseType::PerlinFractal);
-	fastNoise.SetFractalType(FastNoise::FractalType::Billow);
-	fastNoise.SetFractalOctaves(5);
+	fastNoise.SetFractalType(FastNoise::FractalType::FBM);
+	fastNoise.SetFractalOctaves(7);
 
 	fastNoise.SetCellularDistanceFunction(FastNoise::CellularDistanceFunction::Euclidean);
 	fastNoise.SetCellularReturnType(FastNoise::CellularReturnType::Distance2Add);
